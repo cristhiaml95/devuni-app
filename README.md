@@ -197,9 +197,42 @@ flutter test
 - Comprobar políticas RLS en tablas afectadas
 - Revisar funciones/triggers de base de datos
 
-## Próximas Características
+## 🚀 Estado del Proyecto
 
-- [ ] Reportes y analíticas
+### ✅ Completado
+- [x] Estructura base del proyecto Flutter
+- [x] Configuración de Supabase (cliente, auth, providers)
+- [x] Integración con Riverpod para gestión de estado
+- [x] Configuración de Material 3 con tema personalizado
+- [x] Internacionalización (i18n) en español e inglés
+- [x] Sistema de configuración con .env
+- [x] Navegación con go_router
+- [x] Estructura clean architecture (data/domain/features)
+- [x] Compatibilidad con Flutter Web (loader fix)
+- [x] Gestión de sesiones y autenticación
+- [x] UI de login con Google OAuth
+- [x] AuthWrapper para manejo de estados
+- [x] Sistema de logging y debug
+- [x] Control de versiones (Git)
+- [x] Configuración PKCE para Flutter Web
+- [x] Inicializador OAuth para web
+- [x] Manejo mejorado de timeouts y errores
+- [x] Guía de configuración OAuth ([OAUTH_SETUP.md](OAUTH_SETUP.md))
+
+### 🔄 En Progreso
+- [ ] Configuración completa de Google OAuth en Supabase Dashboard
+- [ ] Pruebas de flujo completo de autenticación
+
+### 📋 Próximas Características
+- [ ] Implementación del Dashboard principal
+- [ ] Esquema de base de datos (tablas, RLS, RPCs)
+- [ ] Módulo de Inventario
+- [ ] Sistema multi-tenant (Apps/Espacios)
+- [ ] Gestión de roles y permisos
+- [ ] CRUD de productos/categorías
+- [ ] Reportes y analytics
+- [ ] Tests unitarios e integración
+- [ ] CI/CD Pipeline
 - [ ] Códigos de barras/QR
 - [ ] Notificaciones push
 - [ ] Exportación de datos

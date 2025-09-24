@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import '../core/providers/supabase_providers.dart';
 import '../features/auth/login_screen.dart';
-import '../features/dashboard/dashboard_screen.dart';
+import '../features/apps/screens/apps_selector_screen.dart';
 
 class AuthWrapper extends ConsumerWidget {
   const AuthWrapper({super.key});
@@ -90,8 +90,8 @@ class AuthWrapper extends ConsumerWidget {
       // Estado cargado correctamente
       data: (authData) {
         if (isAuthenticated) {
-          // Usuario autenticado - mostrar dashboard con sistema multi-tenant
-          return const DashboardScreen();
+          // Usuario autenticado - mostrar selector de Apps multi-tenant
+          return const AppsSelectorScreen();
         } else {
           // Usuario no autenticado - mostrar login
           return const LoginScreen();

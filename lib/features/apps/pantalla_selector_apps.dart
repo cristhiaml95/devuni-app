@@ -165,7 +165,7 @@ class _TabMisApps extends ConsumerWidget {
                 const SizedBox(height: 16),
                 Text('Error al cargar apps'),
                 ElevatedButton(
-                  onPressed: () => setState(() {}),
+                  onPressed: () => ref.refresh(appsRepositoryProvider),
                   child: const Text('Reintentar'),
                 ),
               ],

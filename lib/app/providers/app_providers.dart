@@ -35,10 +35,14 @@ final sesionUsuarioProvider = StreamProvider<User?>((ref) {
   return client.auth.onAuthStateChange.map((data) => data.session?.user);
 });
 
-// Provider del usuario actual (estado, no stream)
+// Provider del usuario actual (reactivo basado en el stream)
 final usuarioActualProvider = Provider<User?>((ref) {
-  final client = ref.watch(supabaseClientProvider);
-  return client.auth.currentUser;
+  final sesionAsync = ref.watch(sesionUsuarioProvider);
+  return sesionAsync.when(
+    data: (user) => user,
+    loading: () => null,
+    error: (error, stack) => null,
+  );
 });
 
 // Provider de la app actual seleccionada

@@ -139,12 +139,12 @@ class _DialogoInvitarUsuarioState extends ConsumerState<DialogoInvitarUsuario> {
 
       if (mounted) {
         resultado.fold(
-          siExito: (invitacion) {
+          siExito: (mensaje) {
             Navigator.of(context).pop();
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(
                 content: Text(
-                  'Invitación enviada a ${invitacion.email}',
+                  'Invitación enviada a ${_emailController.text.trim()}',
                 ),
               ),
             );

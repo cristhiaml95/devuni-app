@@ -2,6 +2,29 @@ import '../errors/error_app.dart';
 
 sealed class Resultado<T> {
   const Resultado();
+  
+  bool get esExitoso => this is ResultadoExitoso<T>;
+  bool get esError => this is ResultadoError<T>;
+  
+  T? get datos => switch (this) {
+    ResultadoExitoso<T> exitoso => exitoso.datos,
+    ResultadoError<T> _ => null,
+  };
+  
+  ErrorApp? get error => switch (this) {
+    ResultadoExitoso<T> _ => null,
+    ResultadoError<T> error => error.error,
+  };
+  
+  R fold<R>({
+    required R Function(T datos) siExito,
+    required R Function(ErrorApp error) siError,
+  }) {
+    return switch (this) {
+      ResultadoExitoso<T> exitoso => siExito(exitoso.datos),
+      ResultadoError<T> error => siError(error.error),
+    };
+  }
 }
 
 class ResultadoExitoso<T> extends Resultado<T> {
@@ -40,28 +63,8 @@ class ResultadoError<T> extends Resultado<T> {
   int get hashCode => error.hashCode;
 }
 
-// Extensiones para facilitar el uso
-extension ResultadoExtensions<T> on Resultado<T> {
-  bool get esExitoso => this is ResultadoExitoso<T>;
-  bool get esError => this is ResultadoError<T>;
-  
-  T? get datos => switch (this) {
-    ResultadoExitoso<T> exitoso => exitoso.datos,
-    ResultadoError<T> _ => null,
-  };
-  
-  ErrorApp? get error => switch (this) {
-    ResultadoExitoso<T> _ => null,
-    ResultadoError<T> error => error.error,
-  };
-  
-  R fold<R>({
-    required R Function(T datos) siExito,
-    required R Function(ErrorApp error) siError,
-  }) {
-    return switch (this) {
-      ResultadoExitoso<T> exitoso => siExito(exitoso.datos),
-      ResultadoError<T> error => siError(error.error),
-    };
-  }
+// Métodos de conveniencia estáticos
+class ResultadoUtils {
+  static Resultado<T> exito<T>(T datos) => ResultadoExitoso(datos);
+  static Resultado<T> error<T>(ErrorApp error) => ResultadoError(error);
 }

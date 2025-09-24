@@ -1,45 +1,69 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
-import 'package:hooks_riverpod/hooks_riverpod.dart';
-import 'package:supabase_flutter/supabase_flutter.dart';
-
-import 'app/router/app_router.dart';
-import 'app/theme/app_theme.dart';
 import 'core/config/app_config.dart';
 
 void main() async {
+  print('📍 LÍNEA 3: Iniciando función main()');
+  
+  // Inicializar Flutter
   WidgetsFlutterBinding.ensureInitialized();
+  print('📍 LÍNEA 6: WidgetsFlutterBinding inicializado');
   
   // Cargar variables de entorno
-  await dotenv.load(fileName: ".env");
+  print('📍 LÍNEA 9: Cargando variables de entorno...');
+  await AppConfig.initialize();
+  print('✅ LÍNEA 11: Variables de entorno cargadas');
   
-  // Inicializar Supabase
-  await Supabase.initialize(
-    url: AppConfig.supabaseUrl,
-    anonKey: AppConfig.supabaseAnonKey,
-  );
-  
-  runApp(
-    const ProviderScope(
-      child: DevUniApp(),
-    ),
-  );
+  print('📍 LÍNEA 13: Llamando runApp() con Material 3 + Config');
+  runApp(MyApp());
+  print('✅ LÍNEA 15: runApp() ejecutado');
 }
 
-class DevUniApp extends ConsumerWidget {
-  const DevUniApp({super.key});
-
+class MyApp extends StatelessWidget {
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final router = ref.watch(appRouterProvider);
+  Widget build(BuildContext context) {
+    print('📍 LÍNEA 19: Iniciando build() de MyApp');
+    print('📍 LÍNEA 20: Configurando Material 3 + Localización + Config');
     
-    return MaterialApp.router(
-      title: 'DevUni - Inventario Multi-App',
-      debugShowCheckedModeBanner: false,
-      theme: AppTheme.lightTheme,
-      darkTheme: AppTheme.darkTheme,
-      themeMode: ThemeMode.system,
+    // Obtener color dinámico desde config
+    final primaryColor = AppConfig.primaryColorHex.isNotEmpty 
+        ? Color(int.parse(AppConfig.primaryColorHex))
+        : const Color(0xFF667eea);
+    
+    print('📍 LÍNEA 26: Color primario configurado: ${AppConfig.primaryColorHex}');
+    
+    return MaterialApp(
+      title: AppConfig.appName,
+      debugShowCheckedModeBanner: false, // Temporal: evitar bool.fromEnvironment en web
+      
+      // 🎨 Material 3 Theme con color dinámico
+      theme: ThemeData(
+        useMaterial3: true,
+        colorScheme: ColorScheme.fromSeed(
+          seedColor: primaryColor,
+          brightness: Brightness.light,
+        ),
+        appBarTheme: const AppBarTheme(
+          centerTitle: true,
+          elevation: 0,
+        ),
+      ),
+      
+      // 🌙 Dark Theme con color dinámico
+      darkTheme: ThemeData(
+        useMaterial3: true,
+        colorScheme: ColorScheme.fromSeed(
+          seedColor: primaryColor,
+          brightness: Brightness.dark,
+        ),
+        appBarTheme: const AppBarTheme(
+          centerTitle: true,
+          elevation: 0,
+        ),
+      ),
+      
+      // 🌍 Localización en Español
+      locale: const Locale('es', 'ES'),
       localizationsDelegates: const [
         GlobalMaterialLocalizations.delegate,
         GlobalWidgetsLocalizations.delegate,
@@ -49,7 +73,121 @@ class DevUniApp extends ConsumerWidget {
         Locale('es', 'ES'),
         Locale('en', 'US'),
       ],
-      routerConfig: router,
+      
+      home: Scaffold(
+        appBar: AppBar(
+          title: Text('${AppConfig.appName} v${AppConfig.appVersion}'),
+        ),
+        body: Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(
+                Icons.settings_rounded,
+                size: 80,
+                color: Theme.of(context).colorScheme.primary,
+              ),
+              const SizedBox(height: 24),
+              Text(
+                '¡Variables de Entorno Funcionando!',
+                style: Theme.of(context).textTheme.headlineMedium?.copyWith(
+                  fontWeight: FontWeight.bold,
+                  color: Theme.of(context).colorScheme.onSurface,
+                ),
+                textAlign: TextAlign.center,
+              ),
+              const SizedBox(height: 16),
+              Text(
+                'Configuración dinámica cargada desde .env',
+                style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                  color: Theme.of(context).colorScheme.onSurfaceVariant,
+                ),
+                textAlign: TextAlign.center,
+              ),
+              const SizedBox(height: 32),
+              Card(
+                elevation: 2,
+                margin: const EdgeInsets.symmetric(horizontal: 32),
+                child: Padding(
+                  padding: const EdgeInsets.all(24),
+                  child: Column(
+                    children: [
+                      Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Icon(
+                            Icons.check_circle_rounded,
+                            color: Theme.of(context).colorScheme.primary,
+                            size: 24,
+                          ),
+                          const SizedBox(width: 12),
+                          Flexible(
+                            child: Text(
+                              'Configuración Cargada',
+                              style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                                fontWeight: FontWeight.w600,
+                                color: Theme.of(context).colorScheme.primary,
+                              ),
+                              textAlign: TextAlign.center,
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 16),
+                      _buildConfigInfo(context),
+                    ],
+                  ),
+                ),
+              ),
+              const SizedBox(height: 24),
+              FilledButton.icon(
+                onPressed: () {
+                  print('🎯 Variables de entorno funcionando - Continuar con Riverpod');
+                  AppConfig.printConfig();
+                },
+                icon: const Icon(Icons.rocket_launch_rounded),
+                label: const Text('Continuar con Riverpod'),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+  
+  Widget _buildConfigInfo(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        _buildConfigRow(context, 'Entorno', AppConfig.environment),
+        _buildConfigRow(context, 'Debug', AppConfig.debugMode ? 'Activo' : 'Inactivo'),
+        _buildConfigRow(context, 'Supabase', AppConfig.isSupabaseConfigured ? 'Configurado' : 'No configurado'),
+        _buildConfigRow(context, 'Tema', AppConfig.defaultTheme),
+      ],
+    );
+  }
+  
+  Widget _buildConfigRow(BuildContext context, String label, String value) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 4),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Text(
+            '$label:',
+            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+              fontWeight: FontWeight.w500,
+            ),
+          ),
+          Text(
+            value,
+            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+              color: Theme.of(context).colorScheme.primary,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+        ],
+      ),
     );
   }
 }

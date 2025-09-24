@@ -1,7 +1,5 @@
 import '../../core/types/resultado.dart';
 import '../../domain/entities/unidad_medida_entidad.dart';
-import '../../domain/entities/categoria_entidad.dart';
-import '../../domain/entities/producto_entidad.dart';
 import '../../domain/entities/movimiento_inventario_entidad.dart';
 import '../../domain/entities/tipo_movimiento.dart';
 import '../clients/supabase_client.dart';

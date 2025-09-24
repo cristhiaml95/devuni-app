@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
@@ -145,7 +146,7 @@ class PantallaLogin extends ConsumerWidget {
       
       await client.auth.signInWithOAuth(
         OAuthProvider.google,
-        redirectTo: 'io.supabase.devuni://login-callback/',
+        redirectTo: kIsWeb ? null : 'io.supabase.devuni://login-callback/',
       );
       
       // El cambio de estado se maneja automáticamente por el stream provider

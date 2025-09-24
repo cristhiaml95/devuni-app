@@ -6,7 +6,7 @@ class AppTheme {
     return ThemeData(
       useMaterial3: true,
       colorScheme: ColorScheme.fromSeed(
-        seedColor: const Color(0xFF6750A4),
+        seedColor: const Color(0xFF6366F1),
         brightness: Brightness.light,
       ),
       textTheme: GoogleFonts.robotoTextTheme(),
@@ -27,6 +27,13 @@ class AppTheme {
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(12),
         ),
+      ),
+      // Configuración responsive
+      visualDensity: VisualDensity.adaptivePlatformDensity,
+      // Espaciados adaptativos
+      dividerTheme: const DividerThemeData(
+        space: 1,
+        thickness: 1,
       ),
     );
   }

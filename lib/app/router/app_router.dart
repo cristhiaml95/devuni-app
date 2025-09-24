@@ -3,7 +3,6 @@ import 'package:go_router/go_router.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 
 import '../providers/app_providers.dart';
-import '../../features/auth/pantalla_login.dart';
 import '../../features/apps/pantalla_selector_apps.dart';
 import '../../features/apps/pantalla_detalle_app.dart';
 import '../../features/inventory/pantalla_inventario.dart';
@@ -11,40 +10,28 @@ import '../../features/inventory/pantalla_detalle_producto.dart';
 import '../../features/members/pantalla_miembros.dart';
 
 final appRouterProvider = Provider<GoRouter>((ref) {
-  final usuarioActual = ref.watch(usuarioActualProvider);
   final appActualId = ref.watch(appActualIdProvider);
 
   return GoRouter(
     initialLocation: '/',
     redirect: (context, state) {
-      final estaAutenticado = usuarioActual != null;
+      // Solo manejar redirección entre apps/home ya que la auth se maneja en main.dart
       final tieneAppSeleccionada = appActualId != null;
-      final location = state.location;
+      final location = state.fullPath ?? '/';
 
-      // Si no está autenticado y no está en login, redirigir a login
-      if (!estaAutenticado && location != '/login') {
-        return '/login';
-      }
-
-      // Si está autenticado pero no tiene app seleccionada y no está en selector
-      if (estaAutenticado && !tieneAppSeleccionada && location != '/apps') {
+      // Si no tiene app seleccionada y no está en selector, ir a selector
+      if (!tieneAppSeleccionada && location != '/apps') {
         return '/apps';
       }
 
-      // Si está autenticado, tiene app y está en login o apps, redirigir a home
-      if (estaAutenticado && tieneAppSeleccionada && (location == '/login' || location == '/apps')) {
+      // Si tiene app y está en apps, ir a home
+      if (tieneAppSeleccionada && location == '/apps') {
         return '/';
       }
 
       return null; // No redirigir
     },
     routes: [
-      // Pantalla de login
-      GoRoute(
-        path: '/login',
-        builder: (context, state) => const PantallaLogin(),
-      ),
-
       // Selector de apps
       GoRoute(
         path: '/apps',

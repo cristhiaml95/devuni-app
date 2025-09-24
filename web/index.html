@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <!--
+    If you are serving your web app in a path other than the root, change the
+    href value below to reflect the base path you are serving from.
+
+    The path provided below has to start and end with a slash "/" in order for
+    it to work correctly.
+
+    For more details:
+    * https://developer.mozilla.org/en-US/docs/Web/HTML/Element/base
+
+    This is a placeholder for base href that will be replaced by the value of
+    the `--base-href` argument provided to `flutter build`.
+  -->
+  <base href="$FLUTTER_BASE_HREF">
+
+  <meta charset="UTF-8">
+  <meta content="IE=Edge" http-equiv="X-UA-Compatible">
+  <meta name="description" content="Sistema de Inventario Multi-Espacio con roles y autenticación">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <!-- iOS meta tags & icons -->
+  <meta name="apple-mobile-web-app-capable" content="no">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <meta name="apple-mobile-web-app-title" content="DevUni App">
+  <link rel="apple-touch-icon" href="icons/Icon-192.png">
+
+  <!-- Favicon -->
+  <link rel="icon" type="image/png" href="favicon.png"/>
+
+  <title>DevUni App - Sistema de Inventario</title>
+  <link rel="manifest" href="manifest.json">
+
+  <style>
+    /* Loading indicator */
+    .loading {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+    
+    .loading-spinner {
+      width: 40px;
+      height: 40px;
+      border: 4px solid rgba(255, 255, 255, 0.3);
+      border-radius: 50%;
+      border-top-color: white;
+      animation: spin 1s ease-in-out infinite;
+      margin-bottom: 20px;
+    }
+    
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+    
+    .loading-text {
+      font-size: 18px;
+      font-weight: 500;
+      margin-bottom: 8px;
+    }
+    
+    .loading-subtitle {
+      font-size: 14px;
+      opacity: 0.8;
+    }
+  </style>
+</head>
+<body>
+  <div id="loading" class="loading">
+    <div class="loading-spinner"></div>
+    <div class="loading-text">DevUni App</div>
+    <div class="loading-subtitle">Cargando sistema de inventario...</div>
+  </div>
+
+  <script>
+    function hideLoading() {
+      const loading = document.querySelector('#loading');
+      if (loading) {
+        loading.remove();
+      }
+    }
+
+    // Escuchar el evento de primer frame de Flutter
+    window.addEventListener('flutter-first-frame', hideLoading);
+
+    // Fallback: ocultar loading después de 10 segundos si Flutter no carga
+    setTimeout(hideLoading, 10000);
+
+    // También intentar ocultar cuando el DOM esté completamente cargado
+    document.addEventListener('DOMContentLoaded', function() {
+      setTimeout(function() {
+        if (window._flutter && window._flutter.loader) {
+          hideLoading();
+        }
+      }, 5000);
+    });
+  </script>
+
+  <script src="flutter.js" defer></script>
+  <script>
+    window.addEventListener('load', function(ev) {
+      console.log('🔧 INTENTO 1: Iniciando carga de Flutter con configuración básica...');
+      
+      // Configuración más básica posible
+      window._flutter = window._flutter || {};
+      window._flutter.buildConfig = window._flutter.buildConfig || {};
+      
+      console.log('🔧 Configurando buildConfig básico...');
+      
+      _flutter.loader.load({
+        serviceWorker: {
+          serviceWorkerVersion: null,
+        }
+      }).then(function(engineInitializer) {
+        console.log('🔧 _flutter.loader.load() exitoso, inicializando engine...');
+        return engineInitializer.initializeEngine();
+      }).then(function(appRunner) {
+        console.log('🔧 Engine inicializado, ejecutando app...');
+        return appRunner.runApp();
+      }).then(function() {
+        console.log('✅ Flutter app iniciada exitosamente!');
+        hideLoading();
+      }).catch(function(error) {
+        console.error('❌ Error al cargar Flutter:', error);
+        console.log('🔧 INTENTO 2: Probando configuración alternativa...');
+        
+        // Configuración alternativa
+        _flutter.loader.loadEntrypoint({
+          entrypointUrl: "main.dart.js"
+        }).then(function(engineInitializer) {
+          console.log('🔧 Configuración alternativa exitosa, inicializando engine...');
+          return engineInitializer.initializeEngine();
+        }).then(function(appRunner) {
+          console.log('🔧 Engine inicializado (alternativo), ejecutando app...');
+          return appRunner.runApp();
+        }).then(function() {
+          console.log('✅ Flutter app iniciada exitosamente (alternativo)!');
+          hideLoading();
+        }).catch(function(secondError) {
+          console.error('❌ Error en configuración alternativa:', secondError);
+          hideLoading();
+        });
+      });
+    });
+  </script>
+</body>
+</html>

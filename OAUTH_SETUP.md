@@ -1,4 +1,10 @@
-# 🔐 Configuración de Google OAuth para Supabase
+# 🔐 Configuración de Google OAut### 3. Configurar URLs en Supabase
+
+En **Authentication** → **URL Configuration**:
+- **Site URL**: `http://localhost:3000` (desarrollo)
+- **Redirect URLs**: 
+  - `http://localhost:3000/**`
+  - `https://lkroyzyqkholdskgspnp.supabase.co/**`Supabase
 
 Esta guía te ayudará a configurar Google OAuth en tu proyecto Supabase para que funcione con la aplicación Flutter Web.
 
@@ -16,21 +22,20 @@ Esta guía te ayudará a configurar Google OAuth en tu proyecto Supabase para qu
    - Tipo: Web application
    - Nombre: `DevUni App Web`
    - Authorized JavaScript origins:
-     - `http://localhost:50505` (para desarrollo)
+     - `http://localhost:3000` (para desarrollo)
      - `https://lkroyzyqkholdskgspnp.supabase.co` (tu URL de Supabase)
    - Authorized redirect URIs:
      - `https://lkroyzyqkholdskgspnp.supabase.co/auth/v1/callback`
 
 ### 2. Configurar Supabase Dashboard
 
-1. Ve a [Supabase Dashboard](https://app.supabase.com/)
-2. Selecciona tu proyecto
-3. Ir a **Authentication** → **Providers** → **Google**
-4. Habilitar Google provider
-5. Configurar:
-   - **Client ID**: Pegar el Client ID de Google Cloud Console
-   - **Client Secret**: Pegar el Client Secret de Google Cloud Console
-   - **Redirect URL**: `https://lkroyzyqkholdskgspnp.supabase.co/auth/v1/callback`
+1. Ve a [Supabase Dashboard](https://app.supabase.com/) → tu proyecto
+2. Ir a **Authentication** → **Providers** → **Google**
+3. Habilitar Google provider ✅
+4. Configurar con tus datos reales:
+   - **Client ID**: `TU_GOOGLE_CLIENT_ID.apps.googleusercontent.com`
+   - **Client Secret**: `TU_GOOGLE_CLIENT_SECRET`
+   - **Redirect URL**: `https://TU_PROYECTO.supabase.co/auth/v1/callback`
 
 ### 3. Configurar URLs en Supabase
 

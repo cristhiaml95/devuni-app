@@ -1,4 +1,3 @@
-import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 
@@ -48,7 +47,7 @@ final appRouterProvider = Provider<GoRouter>((ref) {
             path: 'inventario',
             builder: (context, state) => const PantallaInventario(),
           ),
-          
+
           // Productos
           GoRoute(
             path: 'productos/:id',

@@ -3,7 +3,6 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 
 import '../../../app/providers/app_providers.dart';
 import '../../../domain/entities/rol_usuario.dart';
-import '../../../core/types/resultado.dart';
 
 class DialogoInvitarUsuario extends ConsumerStatefulWidget {
   const DialogoInvitarUsuario({super.key});

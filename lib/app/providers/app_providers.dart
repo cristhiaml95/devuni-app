@@ -6,7 +6,6 @@ import '../../data/repositories/apps_repository.dart';
 import '../../data/repositories/miembros_repository.dart';
 import '../../data/repositories/inventario_repository_simple.dart';
 import '../../domain/entities/rol_usuario.dart';
-import '../../core/types/resultado.dart';
 
 // Provider del cliente Supabase
 final supabaseClientProvider = Provider<SupabaseClientService>((ref) {

@@ -21,11 +21,17 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
       print('🔐 Iniciando autenticación con Google...');
       final client = ref.read(supabaseClientProvider);
       
-      // Para web, usamos el método específico de web
+      // Para web, necesitamos configurar el redirectTo al URL actual
+      final currentUrl = Uri.base;
+      final redirectUrl = '${currentUrl.origin}/';
+      
+      print('📍 URL de redirect: $redirectUrl');
+      
+      // Intentar autenticación OAuth para web
       await client.auth.signInWithOAuth(
         OAuthProvider.google,
-        redirectTo: '${AppConfig.supabaseUrl}/auth/v1/callback',
-        authScreenLaunchMode: LaunchMode.platformDefault,
+        redirectTo: redirectUrl,
+        authScreenLaunchMode: LaunchMode.externalApplication,
       );
       
       print('✅ Redirección a Google OAuth iniciada');
@@ -34,10 +40,25 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
       print('❌ Error en autenticación: $error');
       if (!mounted) return;
       
+      // Para testing, mostrar información más detallada
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text('Error al iniciar sesión: $error'),
-          backgroundColor: Colors.red,
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const Text('⚠️ OAuth no configurado completamente'),
+              const SizedBox(height: 4),
+              Text('Error: ${error.toString().substring(0, 100)}...'),
+              const SizedBox(height: 8),
+              const Text(
+                '💡 Necesitas configurar Google OAuth en Supabase Dashboard',
+                style: TextStyle(fontSize: 12),
+              ),
+            ],
+          ),
+          backgroundColor: Colors.orange,
+          duration: const Duration(seconds: 5),
         ),
       );
     } finally {
@@ -141,17 +162,23 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                                   ),
                                 ),
                               )
-                            : Image.asset(
-                                'assets/images/google_logo.png',
+                            : Container(
                                 width: 20,
                                 height: 20,
-                                errorBuilder: (context, error, stackTrace) {
-                                  return Icon(
-                                    Icons.g_mobiledata,
-                                    size: 24,
-                                    color: Colors.blue,
-                                  );
-                                },
+                                decoration: BoxDecoration(
+                                  color: Colors.white,
+                                  borderRadius: BorderRadius.circular(2),
+                                ),
+                                child: const Center(
+                                  child: Text(
+                                    'G',
+                                    style: TextStyle(
+                                      color: Color(0xFF4285F4),
+                                      fontSize: 16,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                ),
                               ),
                         label: Text(
                           _isLoading 

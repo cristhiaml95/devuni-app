@@ -8,6 +8,9 @@ class AuthWrapper extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    // Inicializar OAuth para web (no bloquea la UI)
+    ref.watch(oauthInitializerProvider);
+    
     // Escuchar el estado de autenticación
     final authState = ref.watch(authStateProvider);
     final isAuthenticated = ref.watch(isAuthenticatedProvider);

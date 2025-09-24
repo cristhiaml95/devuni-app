@@ -19,6 +19,7 @@ final supabaseClientProvider = Provider<SupabaseClient>((ref) {
     AppConfig.supabaseAnonKey,
     authOptions: const AuthClientOptions(
       autoRefreshToken: true,
+      pkceAsyncStorage: null, // Para web, usar storage nativo del navegador
     ),
   );
   
@@ -41,11 +42,34 @@ final authStateProvider = StreamProvider<AuthState>((ref) {
     },
   ).map((data) {
     print('🔐 RIVERPOD: Cambio de estado auth: ${data.event}');
-    if (data.session?.user != null) {
-      print('👤 RIVERPOD: Usuario autenticado: ${data.session!.user.email}');
-    } else {
-      print('👤 RIVERPOD: Usuario no autenticado');
+    
+    // Logging detallado para cada evento
+    switch (data.event) {
+      case AuthChangeEvent.signedIn:
+        print('✅ RIVERPOD: Usuario inició sesión exitosamente');
+        if (data.session?.user != null) {
+          print('👤 RIVERPOD: Email: ${data.session!.user.email}');
+          print('🆔 RIVERPOD: User ID: ${data.session!.user.id}');
+        }
+        break;
+      case AuthChangeEvent.signedOut:
+        print('🚪 RIVERPOD: Usuario cerró sesión');
+        break;
+      case AuthChangeEvent.initialSession:
+        print('🏁 RIVERPOD: Sesión inicial detectada');
+        if (data.session?.user != null) {
+          print('👤 RIVERPOD: Sesión existente para: ${data.session!.user.email}');
+        } else {
+          print('👤 RIVERPOD: No hay sesión existente');
+        }
+        break;
+      case AuthChangeEvent.tokenRefreshed:
+        print('🔄 RIVERPOD: Token refrescado');
+        break;
+      default:
+        print('❓ RIVERPOD: Evento desconocido: ${data.event}');
     }
+    
     return data;
   });
 });
@@ -107,4 +131,34 @@ final currentSessionProvider = Provider<Session?>((ref) {
       return null;
     },
   );
+});
+
+/// Provider para inicializar la sesión OAuth en web
+/// Verifica si hay tokens en la URL después de redirect OAuth
+final oauthInitializerProvider = FutureProvider<void>((ref) async {
+  final client = ref.read(supabaseClientProvider);
+  
+  try {
+    print('🌐 Inicializando OAuth para web...');
+    
+    // Para web: verificar si hay parámetros OAuth en la URL
+    final uri = Uri.base;
+    if (uri.fragment.isNotEmpty) {
+      print('🔗 Fragmento de URL detectado: ${uri.fragment}');
+      
+      // Supabase maneja automáticamente la extracción de tokens
+      // Solo necesitamos forzar una verificación de sesión
+      final session = client.auth.currentSession;
+      if (session != null) {
+        print('✅ Sesión OAuth recuperada exitosamente');
+      } else {
+        print('⚠️ No se pudo recuperar sesión OAuth');
+      }
+    }
+    
+    print('✅ Inicialización OAuth completada');
+  } catch (error) {
+    print('❌ Error inicializando OAuth: $error');
+    // No relanzar el error, solo registrarlo
+  }
 });

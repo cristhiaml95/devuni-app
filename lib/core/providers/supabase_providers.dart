@@ -27,12 +27,19 @@ final supabaseClientProvider = Provider<SupabaseClient>((ref) {
 });
 
 /// Provider para el estado de autenticación actual
-/// Escucha los cambios de auth.onAuthStateChange
+/// Escucha los cambios de auth.onAuthStateChange con timeout
 final authStateProvider = StreamProvider<AuthState>((ref) {
   final client = ref.watch(supabaseClientProvider);
   print('🔐 RIVERPOD: Monitoreando estado de autenticación...');
   
-  return client.auth.onAuthStateChange.map((data) {
+  return client.auth.onAuthStateChange.timeout(
+    const Duration(seconds: 10),
+    onTimeout: (sink) {
+      print('⏰ RIVERPOD: Timeout en autenticación, usando estado inicial');
+      // En caso de timeout, crear un AuthState inicial sin sesión
+      sink.add(AuthState(AuthChangeEvent.signedOut, null));
+    },
+  ).map((data) {
     print('🔐 RIVERPOD: Cambio de estado auth: ${data.event}');
     if (data.session?.user != null) {
       print('👤 RIVERPOD: Usuario autenticado: ${data.session!.user.email}');

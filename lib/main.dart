@@ -1,6 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
+import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'core/config/app_config.dart';
+
+// Imports condicionales para testing
+import 'core/providers/supabase_providers.dart' as supabase_providers;
 
 void main() async {
   print('📍 LÍNEA 3: Iniciando función main()');
@@ -14,14 +18,18 @@ void main() async {
   await AppConfig.initialize();
   print('✅ LÍNEA 11: Variables de entorno cargadas');
   
-  print('📍 LÍNEA 13: Llamando runApp() con Material 3 + Config');
-  runApp(MyApp());
-  print('✅ LÍNEA 15: runApp() ejecutado');
+  print('📍 LÍNEA 13: Llamando runApp() con ProviderScope + Material 3 + Config');
+  runApp(
+    ProviderScope(
+      child: MyApp(),
+    ),
+  );
+  print('✅ LÍNEA 15: runApp() ejecutado con ProviderScope');
 }
 
-class MyApp extends StatelessWidget {
+class MyApp extends ConsumerWidget {
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     print('📍 LÍNEA 19: Iniciando build() de MyApp');
     print('📍 LÍNEA 20: Configurando Material 3 + Localización + Config');
     
@@ -142,11 +150,21 @@ class MyApp extends StatelessWidget {
               const SizedBox(height: 24),
               FilledButton.icon(
                 onPressed: () {
-                  print('🎯 Variables de entorno funcionando - Continuar con Riverpod');
+                  print('🎯 Variables de entorno funcionando - Probando Riverpod + Supabase');
                   AppConfig.printConfig();
+                  
+                  // Probar el cliente de Supabase con Riverpod
+                  try {
+                    final client = ref.read(supabase_providers.supabaseClientProvider);
+                    print('✅ Cliente Supabase inicializado con Riverpod');
+                    print('   🔗 URL: ${AppConfig.supabaseUrl}');
+                    print('   🔑 Auth client: ${client.auth.currentUser?.email ?? "No auth"}');
+                  } catch (e) {
+                    print('❌ Error inicializando cliente Supabase: $e');
+                  }
                 },
                 icon: const Icon(Icons.rocket_launch_rounded),
-                label: const Text('Continuar con Riverpod'),
+                label: const Text('Probar Riverpod + Supabase'),
               ),
             ],
           ),

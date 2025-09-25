@@ -1,16 +1,45 @@
 import 'package:flutter/material.dart';
-import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 import '../core/providers/supabase_providers.dart';
 import '../features/auth/login_screen.dart';
 import '../features/apps/screens/apps_selector_screen.dart';
 
-class AuthWrapper extends ConsumerWidget {
+class AuthWrapper extends ConsumerStatefulWidget {
   const AuthWrapper({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<AuthWrapper> createState() => _AuthWrapperState();
+}
+
+class _AuthWrapperState extends ConsumerState<AuthWrapper> {
+  bool _forceShowLogin = false;
+  bool _hasShownLogin = false;
+
+  @override
+  void initState() {
+    super.initState();
+
+    // Timeout automático después de 5 segundos (aumentado para mejor UX)
+    Future.delayed(const Duration(seconds: 5), () {
+      if (mounted && !_forceShowLogin && !_hasShownLogin) {
+        print('⏰ Timeout de 5 segundos alcanzado, mostrando login');
+        setState(() {
+          _forceShowLogin = true;
+        });
+      }
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
     // Inicializar OAuth para web (no bloquea la UI)
     ref.watch(oauthInitializerProvider);
+
+    // Si se forza mostrar login, ir directo al login
+    if (_forceShowLogin) {
+      return const LoginScreen();
+    }
 
     // Escuchar el estado de autenticación
     final authState = ref.watch(authStateProvider);
@@ -42,9 +71,11 @@ class AuthWrapper extends ConsumerWidget {
               TextButton(
                 onPressed: () {
                   print('🔄 Usuario solicitó skip de loading');
-                  ref.invalidate(authStateProvider);
+                  setState(() {
+                    _forceShowLogin = true;
+                  });
                 },
-                child: const Text('Saltar si toma mucho tiempo'),
+                child: const Text('Ir a login'),
               ),
             ],
           ),
@@ -78,7 +109,9 @@ class AuthWrapper extends ConsumerWidget {
               const SizedBox(height: 24),
               ElevatedButton(
                 onPressed: () {
-                  ref.invalidate(authStateProvider);
+                  print('🔄 Usuario solicitó reintentar conexión');
+                  // Refrescar de manera más gentil sin invalidar todo el provider
+                  final _ = ref.refresh(oauthInitializerProvider);
                 },
                 child: const Text('Reintentar'),
               ),
@@ -89,12 +122,33 @@ class AuthWrapper extends ConsumerWidget {
 
       // Estado cargado correctamente
       data: (authData) {
+        print(
+            '🔐 AUTH_WRAPPER: Procesando estado auth - Event: ${authData.event}');
+        print('🔐 AUTH_WRAPPER: Usuario autenticado: $isAuthenticated');
+
         if (isAuthenticated) {
+          print('✅ AUTH_WRAPPER: Navegando a AppsSelectorScreen');
+
+          // Marcar que ya se mostró contenido autenticado
+          if (!_hasShownLogin) {
+            _hasShownLogin = true;
+          }
+
           // Usuario autenticado - mostrar selector de Apps multi-tenant
           return const AppsSelectorScreen();
         } else {
-          // Usuario no autenticado - mostrar login
-          return const LoginScreen();
+          // Solo mostrar login si no estamos en medio de un proceso de auth
+          // o si es la primera vez
+          if (!_hasShownLogin || authData.event == AuthChangeEvent.signedOut) {
+            print('🚪 AUTH_WRAPPER: Navegando a LoginScreen');
+            _hasShownLogin = true;
+            return const LoginScreen();
+          } else {
+            // Mantener la pantalla actual mientras se resuelve el estado
+            print(
+                '⏳ AUTH_WRAPPER: Manteniendo estado mientras se resuelve auth');
+            return const AppsSelectorScreen();
+          }
         }
       },
     );

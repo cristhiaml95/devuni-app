@@ -8,6 +8,7 @@ import '../../../core/theme/app_typography.dart';
 import '../../../core/widgets/responsive_widgets.dart';
 import '../providers/apps_provider.dart';
 import '../models/app_model.dart';
+import 'database_test_screen.dart';
 
 /// Pantalla selector de Apps (espacios de trabajo) para multi-tenancy
 class AppsSelectorScreen extends ConsumerWidget {
@@ -98,19 +99,47 @@ class AppsSelectorScreen extends ConsumerWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(
-          'Tus Espacios de Trabajo',
-          style: AppTypography.headlineLarge.copyWith(
-            color: AppColors.primary,
-            fontWeight: FontWeight.bold,
-          ),
-        ),
-        const SizedBox(height: 8),
-        Text(
-          'Selecciona un espacio de trabajo para continuar',
-          style: AppTypography.bodyLarge.copyWith(
-            color: AppColors.onSurfaceVariant,
-          ),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'Tus Espacios de Trabajo',
+                    style: AppTypography.headlineLarge.copyWith(
+                      color: AppColors.primary,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    'Selecciona un espacio de trabajo para continuar',
+                    style: AppTypography.bodyLarge.copyWith(
+                      color: AppColors.onSurfaceVariant,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            // Botón de test de base de datos
+            IconButton(
+              onPressed: () {
+                Navigator.of(context).push(
+                  MaterialPageRoute(
+                    builder: (_) => const DatabaseTestScreen(),
+                  ),
+                );
+              },
+              icon: const Icon(Icons.bug_report),
+              tooltip: 'Test Base de Datos',
+              style: IconButton.styleFrom(
+                backgroundColor: AppColors.primary.withOpacity(0.1),
+                foregroundColor: AppColors.primary,
+              ),
+            ),
+          ],
         ),
       ],
     );
@@ -193,9 +222,8 @@ class AppsSelectorScreen extends ConsumerWidget {
   }
 
   int _getCrossAxisCount(double width) {
-    if (width > 1200) return 4;
-    if (width > 800) return 3;
-    if (width > 500) return 2;
+    if (width > 1000) return 3;
+    if (width > 600) return 2;
     return 1;
   }
 
@@ -264,10 +292,10 @@ class AppsSelectorScreen extends ConsumerWidget {
             const SizedBox(height: 4),
 
             // Descripción
-            if (app.description != null)
-              Expanded(
+            if (app.description.isNotEmpty)
+              Flexible(
                 child: Text(
-                  app.description!,
+                  app.description,
                   style: AppTypography.bodySmall.copyWith(
                     color: AppColors.onSurfaceVariant,
                   ),

@@ -30,20 +30,28 @@ final supabaseClientProvider = Provider<SupabaseClient>((ref) {
 });
 
 /// Provider para el estado de autenticación actual
-/// Escucha los cambios de auth.onAuthStateChange con timeout
+/// Escucha los cambios de auth.onAuthStateChange con filtrado estable
 final authStateProvider = StreamProvider<AuthState>((ref) {
   final client = ref.watch(supabaseClientProvider);
   print('🔐 RIVERPOD: Monitoreando estado de autenticación...');
 
-  return client.auth.onAuthStateChange.timeout(
-    const Duration(seconds: 10),
-    onTimeout: (sink) {
-      print('⏰ RIVERPOD: Timeout en autenticación, usando estado inicial');
-      // En caso de timeout, crear un AuthState inicial sin sesión
-      sink.add(AuthState(AuthChangeEvent.signedOut, null));
-    },
-  ).map((data) {
-    print('🔐 RIVERPOD: Cambio de estado auth: ${data.event}');
+  // Keepalive para evitar que el stream se cierre
+  ref.keepAlive();
+
+  return client.auth.onAuthStateChange.where((data) {
+    // Filtrar eventos problemáticos que pueden causar logout automático
+    // Solo procesar eventos importantes
+    final shouldProcess = data.event == AuthChangeEvent.signedIn ||
+        data.event == AuthChangeEvent.signedOut ||
+        data.event == AuthChangeEvent.initialSession;
+
+    if (!shouldProcess) {
+      print('🔍 RIVERPOD: Ignorando evento: ${data.event}');
+    }
+
+    return shouldProcess;
+  }).map((data) {
+    print('🔐 RIVERPOD: Procesando cambio de estado auth: ${data.event}');
 
     // Logging detallado para cada evento
     switch (data.event) {
@@ -66,11 +74,8 @@ final authStateProvider = StreamProvider<AuthState>((ref) {
           print('👤 RIVERPOD: No hay sesión existente');
         }
         break;
-      case AuthChangeEvent.tokenRefreshed:
-        print('🔄 RIVERPOD: Token refrescado');
-        break;
       default:
-        print('❓ RIVERPOD: Evento desconocido: ${data.event}');
+        print('❓ RIVERPOD: Evento procesado: ${data.event}');
     }
 
     return data;
@@ -107,6 +112,7 @@ final currentUserProvider = Provider<User?>((ref) {
 final isAuthenticatedProvider = Provider<bool>((ref) {
   final user = ref.watch(currentUserProvider);
   final isAuth = user != null;
+
   print('🔐 RIVERPOD: Usuario autenticado: $isAuth');
   return isAuth;
 });

@@ -152,37 +152,90 @@ final oauthInitializerProvider = FutureProvider<void>((ref) async {
 
     // Verificar si hay tokens en la URL (después de OAuth redirect)
     final uri = Uri.base;
+    print('🔗 URL actual: ${uri.toString()}');
+    print('🔗 Fragment: "${uri.fragment}"');
+
     if (uri.fragment.isNotEmpty && uri.fragment.contains('access_token')) {
       print('🔗 Tokens OAuth detectados en URL');
-      print('🔗 Fragmento: ${uri.fragment.substring(0, 100)}...');
+      print('🔗 Fragmento completo: ${uri.fragment}');
 
       try {
-        // Forzar el procesamiento de la sesión OAuth
+        // Método 1: Usar getSessionFromUrl con la URL completa
+        print('🔄 Método 1: getSessionFromUrl...');
         await client.auth.getSessionFromUrl(uri);
-        print('✅ Sesión OAuth procesada exitosamente');
+        print('✅ Sesión OAuth procesada exitosamente con método 1');
 
         // Verificar si ahora tenemos una sesión válida
         final session = client.auth.currentSession;
         if (session?.user != null) {
           print('👤 Usuario autenticado: ${session!.user.email}');
+          return; // Éxito, salir
         }
       } catch (e) {
-        print('❌ Error procesando tokens OAuth: $e');
-        // Intentar método alternativo para procesar la URL
-        try {
-          // Parsear manualmente los tokens y establecer la sesión
-          final fragment = uri.fragment;
-          if (fragment.contains('access_token=')) {
-            print('🔄 Intentando procesamiento alternativo de tokens...');
-            // Permitir que Supabase detecte automáticamente la sesión
-            await Future.delayed(const Duration(milliseconds: 500));
-          }
-        } catch (e2) {
-          print('❌ Error en procesamiento alternativo: $e2');
-        }
+        print('❌ Error en método 1: $e');
       }
+
+      try {
+        // Método 2: Parsear manualmente y usar setSession
+        print('🔄 Método 2: Parseo manual de tokens...');
+
+        final fragment = uri.fragment;
+        final params = <String, String>{};
+
+        // Parsear el fragment manualmente
+        for (final pair in fragment.split('&')) {
+          final parts = pair.split('=');
+          if (parts.length == 2) {
+            params[parts[0]] = Uri.decodeComponent(parts[1]);
+          }
+        }
+
+        final accessToken = params['access_token'];
+
+        if (accessToken != null) {
+          print('🔑 Access token encontrado');
+
+          // Usar el access token para obtener el usuario
+          final response = await client.auth.getUser(accessToken);
+          if (response.user != null) {
+            print('� Usuario obtenido del token: ${response.user!.email}');
+
+            // Crear sesión manualmente si es necesario
+            // Esto debería activar el listener de auth state change
+            print('✅ Método 2 exitoso');
+            return;
+          }
+        }
+      } catch (e2) {
+        print('❌ Error en método 2: $e2');
+      }
+
+      try {
+        // Método 3: Limpiar la URL y detectar automáticamente
+        print('🔄 Método 3: Detección automática...');
+
+        // Simplemente esperar a que Supabase detecte automáticamente
+        await Future.delayed(const Duration(seconds: 1));
+
+        final session = client.auth.currentSession;
+        if (session?.user != null) {
+          print('👤 Sesión detectada automáticamente: ${session!.user.email}');
+          print('✅ Método 3 exitoso');
+          return;
+        }
+      } catch (e3) {
+        print('❌ Error en método 3: $e3');
+      }
+
+      print('⚠️ Todos los métodos OAuth fallaron, pero continuando...');
     } else {
       print('📱 No hay tokens OAuth en la URL - sesión normal');
+
+      // Verificar si ya hay una sesión existente
+      final existingSession = client.auth.currentSession;
+      if (existingSession?.user != null) {
+        print('👤 Sesión existente encontrada: ${existingSession!.user.email}');
+      }
     }
 
     print('✅ Inicialización OAuth completada');

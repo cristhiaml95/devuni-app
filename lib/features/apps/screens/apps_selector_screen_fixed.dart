@@ -240,7 +240,7 @@ class AppsSelectorScreen extends ConsumerWidget {
                     child: Text(
                       'OWNER',
                       style: AppTypography.labelSmall.copyWith(
-                        color: Colors.white,
+                        color: AppColors.onPrimary,
                         fontWeight: FontWeight.bold,
                       ),
                     ),
@@ -393,10 +393,29 @@ class AppsSelectorScreen extends ConsumerWidget {
   }
 
   Widget _buildCreateAppButton(BuildContext context, WidgetRef ref) {
-    return ResponsiveButton(
-      text: 'Crear Nueva App',
-      onPressed: () => _showCreateAppDialog(context, ref),
-      icon: Icons.add,
+    return SizedBox(
+      width: double.infinity,
+      child: ResponsiveButton(
+        onPressed: () => _showCreateAppDialog(context, ref),
+        style: ResponsiveButton.styleFrom(
+          backgroundColor: AppColors.primary,
+          foregroundColor: AppColors.onPrimary,
+          padding: const EdgeInsets.symmetric(vertical: 16),
+        ),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            const Icon(Icons.add),
+            const SizedBox(width: 8),
+            Text(
+              'Crear Nueva App',
+              style: AppTypography.labelLarge.copyWith(
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+          ],
+        ),
+      ),
     );
   }
 

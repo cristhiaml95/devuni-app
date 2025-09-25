@@ -22,6 +22,12 @@ class AppModel {
 
   /// Crear AppModel desde JSON (response de Supabase)
   factory AppModel.fromJson(Map<String, dynamic> json) {
+    // Si viene de RPC functions (nombres en español)
+    if (json.containsKey('nombre')) {
+      return AppModel.fromSupabaseRPC(json);
+    }
+
+    // Si viene de queries directas (nombres en inglés)
     return AppModel(
       id: json['id'] as String,
       name: json['name'] as String,
@@ -31,6 +37,20 @@ class AppModel {
       updatedAt: DateTime.parse(json['updated_at'] as String),
       logoUrl: json['logo_url'] as String?,
       isActive: json['is_active'] as bool? ?? true,
+    );
+  }
+
+  /// Crear AppModel desde response de RPC Functions (nombres en español)
+  factory AppModel.fromSupabaseRPC(Map<String, dynamic> json) {
+    return AppModel(
+      id: json['id'] as String,
+      name: json['nombre'] as String,
+      description: json['descripcion'] as String? ?? '',
+      ownerId: json['propietario_id'] as String,
+      createdAt: DateTime.parse(json['creado_en'] as String),
+      updatedAt: DateTime.parse(json['actualizado_en'] as String),
+      logoUrl: null, // RPC no devuelve logo_url
+      isActive: json['activa'] as bool? ?? true,
     );
   }
 

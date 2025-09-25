@@ -1,7 +1,12 @@
 import '../../core/types/resultado.dart';
-import '../../domain/entities/unidad_medida_entidad.dart';
-import '../../domain/entities/movimiento_inventario_entidad.dart';
-import '../../domain/entities/tipo_movimiento.dart';
+import '../../domain/entities/inventario/unidad_medida_entidad.dart';
+import '../../domain/entities/inventario/movimiento_inventario_entidad.dart';
+import '../../domain/entities/inventario/tipo_movimiento.dart';
+import '../../domain/entities/inventario/categoria_inventario_entidad.dart';
+import '../../domain/entities/inventario/almacen_entidad.dart';
+import '../../domain/entities/inventario/producto_inventario_entidad.dart';
+import '../../domain/entities/inventario/stock_actual_entidad.dart';
+import '../../domain/entities/inventario/stock_por_almacen_entidad.dart';
 import '../clients/supabase_client.dart';
 
 class InventarioRepository {
@@ -212,11 +217,13 @@ class InventarioRepository {
     int? offset,
   }) async {
     return _client.ejecutarQuery(() async {
-      var query = _client.client
+      var baseQuery = _client.client
           .from('productos_inventario')
           .select()
           .eq('app_id', appId)
           .eq('activo', true);
+
+      dynamic query = baseQuery;
 
       if (busqueda != null && busqueda.isNotEmpty) {
         query = query.or('sku.ilike.%$busqueda%,nombre.ilike.%$busqueda%');
@@ -300,8 +307,7 @@ class InventarioRepository {
     return _client.ejecutarQuery(() async {
       await _client.client
           .from('productos_inventario')
-          .update({'activo': false})
-          .eq('id', id);
+          .update({'activo': false}).eq('id', id);
     });
   }
 
@@ -338,10 +344,12 @@ class InventarioRepository {
     int? offset,
   }) async {
     return _client.ejecutarQuery(() async {
-      var query = _client.client
+      var baseQuery = _client.client
           .from('movimientos_inventario')
           .select()
           .eq('app_id', appId);
+
+      dynamic query = baseQuery;
 
       if (productoId != null) {
         query = query.eq('producto_id', productoId);

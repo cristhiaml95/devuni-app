@@ -1,84 +1,68 @@
 import 'package:go_router/go_router.dart';
-import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../providers/app_providers.dart';
-import '../../features/apps/pantalla_selector_apps.dart';
-import '../../features/apps/pantalla_detalle_app.dart';
-import '../../features/inventory/pantalla_inventario.dart';
-import '../../features/inventory/pantalla_detalle_producto.dart';
-import '../../features/members/pantalla_miembros.dart';
+import '../auth_wrapper.dart';
+import '../../features/apps/screens/apps_selector_screen.dart';
+import '../../features/dashboard/dashboard_screen.dart';
+import '../../features/inventory/screens/productos_list_screen.dart';
+import '../../features/inventory/screens/producto_form_screen.dart';
 
+/// Provider del router principal de la aplicación
 final appRouterProvider = Provider<GoRouter>((ref) {
-  final appActualId = ref.watch(appActualIdProvider);
-
   return GoRouter(
     initialLocation: '/',
-    redirect: (context, state) {
-      // Solo manejar redirección entre apps/home ya que la auth se maneja en main.dart
-      final tieneAppSeleccionada = appActualId != null;
-      final location = state.fullPath ?? '/';
-
-      // Si no tiene app seleccionada y no está en selector, ir a selector
-      if (!tieneAppSeleccionada && location != '/apps') {
-        return '/apps';
+    debugLogDiagnostics: true,
+    // Manejar errores de ruta desconocida
+    errorBuilder: (context, state) {
+      print('🚫 ROUTER: Ruta no encontrada: ${state.uri}');
+      // Si hay un fragment con access_token, redirigir al AuthWrapper
+      if (state.uri.fragment.contains('access_token')) {
+        print('🔗 ROUTER: Detectado token OAuth, redirigiendo a AuthWrapper');
+        return const AuthWrapper();
       }
-
-      // Si tiene app y está en apps, ir a home
-      if (tieneAppSeleccionada && location == '/apps') {
-        return '/';
-      }
-
-      return null; // No redirigir
+      // Para otras rutas desconocidas, mostrar también el AuthWrapper
+      return const AuthWrapper();
     },
     routes: [
-      // Selector de apps
-      GoRoute(
-        path: '/apps',
-        builder: (context, state) => const PantallaSelectorApps(),
-      ),
-
-      // App principal (dashboard)
+      // Ruta raíz - AuthWrapper maneja auth
       GoRoute(
         path: '/',
-        builder: (context, state) => const PantallaDetalleApp(),
+        builder: (context, state) => const AuthWrapper(),
+      ),
+
+      // Selector de Apps (después de login)
+      GoRoute(
+        path: '/apps',
+        builder: (context, state) => const AppsSelectorScreen(),
+      ),
+
+      // Dashboard principal (después de seleccionar app)
+      GoRoute(
+        path: '/dashboard',
+        builder: (context, state) => const DashboardScreen(),
         routes: [
-          // Inventario
+          // Inventario principal
           GoRoute(
             path: 'inventario',
-            builder: (context, state) => const PantallaInventario(),
-          ),
-
-          // Productos
-          GoRoute(
-            path: 'productos/:id',
-            builder: (context, state) {
-              final productoId = state.pathParameters['id']!;
-              return PantallaDetalleProducto(productoId: productoId);
-            },
-          ),
-
-          // Miembros y configuración
-          GoRoute(
-            path: 'miembros',
-            builder: (context, state) => const PantallaMiembros(),
+            builder: (context, state) => const ProductosListScreen(),
+            routes: [
+              // Agregar producto
+              GoRoute(
+                path: 'agregar',
+                builder: (context, state) => const ProductoFormScreen(),
+              ),
+              // Editar producto
+              GoRoute(
+                path: 'editar/:id',
+                builder: (context, state) {
+                  final id = state.pathParameters['id']!;
+                  return ProductoFormScreen(productoId: id);
+                },
+              ),
+            ],
           ),
         ],
       ),
     ],
   );
 });
-
-// Extensiones para navegación fácil
-extension AppRouterExtension on GoRouter {
-  void irALogin() => go('/login');
-  void irASelectorApps() => go('/apps');
-  void irAHome() => go('/');
-  void irAInventario() => go('/inventario');
-  void irAUnidades() => go('/inventario/unidades');
-  void irACategorias() => go('/inventario/categorias');
-  void irAAlmacenes() => go('/inventario/almacenes');
-  void irAProductos() => go('/inventario/productos');
-  void irAMovimientos() => go('/inventario/movimientos');
-  void irAStock() => go('/inventario/stock');
-  void irAMiembros() => go('/miembros');
-}

@@ -1,20 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <!--
-    If you are serving your web app in a path other than the root, change the
-    href value below to reflect the base path you are serving from.
-
-    The path provided below has to start and end with a slash "/" in order for
-    it to work correctly.
-
-    For more details:
-    * https://developer.mozilla.org/en-US/docs/Web/HTML/Element/base
-
-    This is a placeholder for base href that will be replaced by the value of
-    the `--base-href` argument provided to `flutter build`.
-  -->
-  <base href="$FLUTTER_BASE_HREF">
+  <base href="/">
 
   <meta charset="UTF-8">
   <meta content="IE=Edge" http-equiv="X-UA-Compatible">
@@ -103,52 +90,6 @@
     });
   </script>
 
-  <script src="flutter.js" defer></script>
-  <script>
-    window.addEventListener('load', function(ev) {
-      console.log('🔧 INTENTO 1: Iniciando carga de Flutter con configuración básica...');
-      
-      // Configuración más básica posible
-      window._flutter = window._flutter || {};
-      window._flutter.buildConfig = window._flutter.buildConfig || {};
-      
-      console.log('🔧 Configurando buildConfig básico...');
-      
-      _flutter.loader.load({
-        serviceWorker: {
-          serviceWorkerVersion: null,
-        }
-      }).then(function(engineInitializer) {
-        console.log('🔧 _flutter.loader.load() exitoso, inicializando engine...');
-        return engineInitializer.initializeEngine();
-      }).then(function(appRunner) {
-        console.log('🔧 Engine inicializado, ejecutando app...');
-        return appRunner.runApp();
-      }).then(function() {
-        console.log('✅ Flutter app iniciada exitosamente!');
-        hideLoading();
-      }).catch(function(error) {
-        console.error('❌ Error al cargar Flutter:', error);
-        console.log('🔧 INTENTO 2: Probando configuración alternativa...');
-        
-        // Configuración alternativa
-        _flutter.loader.loadEntrypoint({
-          entrypointUrl: "main.dart.js"
-        }).then(function(engineInitializer) {
-          console.log('🔧 Configuración alternativa exitosa, inicializando engine...');
-          return engineInitializer.initializeEngine();
-        }).then(function(appRunner) {
-          console.log('🔧 Engine inicializado (alternativo), ejecutando app...');
-          return appRunner.runApp();
-        }).then(function() {
-          console.log('✅ Flutter app iniciada exitosamente (alternativo)!');
-          hideLoading();
-        }).catch(function(secondError) {
-          console.error('❌ Error en configuración alternativa:', secondError);
-          hideLoading();
-        });
-      });
-    });
-  </script>
+  <script src="flutter_bootstrap.js" async></script>
 </body>
 </html>

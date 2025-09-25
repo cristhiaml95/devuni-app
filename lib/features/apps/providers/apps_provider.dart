@@ -76,7 +76,16 @@ final memberAppsProvider = StreamProvider<List<AppModel>>((ref) {
 /// Helper para obtener member apps via RPC
 Future<List<AppModel>> _fetchMemberAppsRPC(SupabaseClient client) async {
   try {
-    final response = await client.rpc('get_member_apps');
+    // Obtener el ID del usuario actual
+    final userId = client.auth.currentUser?.id;
+    if (userId == null) {
+      print('❌ APPS: Usuario no autenticado para obtener member apps');
+      return [];
+    }
+
+    final response = await client.rpc('get_member_apps', params: {
+      'user_uuid': userId,
+    });
 
     if (response is List) {
       final apps = response.map((json) => AppModel.fromJson(json)).toList();
@@ -123,14 +132,23 @@ class AppsRepository {
     print('📱 APPS: Creando nuevo App: $name');
 
     try {
-      final response = await _client.rpc('create_app', params: {
+      // Obtener el ID del usuario actual
+      final userId = _client.auth.currentUser?.id;
+      if (userId == null) {
+        throw Exception('Usuario no autenticado');
+      }
+
+      final response = await _client.rpc('create_app_and_membership', params: {
+        'user_uuid': userId,
         'app_name': name,
-        'app_description': description,
+        'app_description': description ?? '',
       });
 
       if (response is List && response.isNotEmpty) {
+        // La función devuelve una tabla con información del app creado
         final appData = response[0];
-        print('✅ APPS: App creado exitosamente: ${appData['id']}');
+        print('✅ APPS: App creado exitosamente: ${appData}');
+
         return AppModel.fromJson(appData);
       } else {
         throw Exception('No se pudo crear la App');

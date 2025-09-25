@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_typography.dart';
+
 import '../../../core/widgets/responsive_widgets.dart';
 import '../providers/apps_provider.dart';
 import '../models/app_model.dart';
@@ -171,13 +172,13 @@ class AppsSelectorScreen extends ConsumerWidget {
         return LayoutBuilder(
           builder: (context, constraints) {
             final crossAxisCount = _getCrossAxisCount(constraints.maxWidth);
-
+            
             return GridView.builder(
               shrinkWrap: true,
               physics: const NeverScrollableScrollPhysics(),
               gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
                 crossAxisCount: crossAxisCount,
-                childAspectRatio: 1.2,
+                childAspectRatio: 1.1, // Hacer cards un poco más altas
                 crossAxisSpacing: 16,
                 mainAxisSpacing: 16,
               ),
@@ -192,9 +193,7 @@ class AppsSelectorScreen extends ConsumerWidget {
       loading: () => _buildLoadingGrid(),
       error: (error, stack) => _buildErrorState(error.toString()),
     );
-  }
-
-  int _getCrossAxisCount(double width) {
+  }  int _getCrossAxisCount(double width) {
     if (width < 600) return 1; // Mobile: 1 columna
     if (width < 900) return 2; // Tablet: 2 columnas
     return 3; // Desktop: 3 columnas
@@ -213,17 +212,18 @@ class AppsSelectorScreen extends ConsumerWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
+            // Icono y badge owner
             Row(
               children: [
                 Container(
                   width: 48,
                   height: 48,
                   decoration: BoxDecoration(
-                    color: AppColors.primary.withOpacity(0.1),
+                    color: AppColors.primaryLight,
                     borderRadius: BorderRadius.circular(12),
                   ),
                   child: Icon(
-                    Icons.apps,
+                    Icons.business,
                     color: AppColors.primary,
                     size: 24,
                   ),
@@ -247,33 +247,34 @@ class AppsSelectorScreen extends ConsumerWidget {
                   ),
               ],
             ),
+
             const SizedBox(height: 12),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    app.name,
-                    style: AppTypography.titleMedium.copyWith(
-                      color: AppColors.onSurface,
-                      fontWeight: FontWeight.w600,
-                    ),
-                    maxLines: 2,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                  const SizedBox(height: 4),
-                  if (app.description.isNotEmpty)
-                    Text(
-                      app.description,
-                      style: AppTypography.bodySmall.copyWith(
-                        color: AppColors.onSurfaceVariant,
-                      ),
-                      maxLines: 2,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                ],
+
+            // Nombre del App
+            Text(
+              app.name,
+              style: AppTypography.titleMedium.copyWith(
+                color: AppColors.onSurface,
+                fontWeight: FontWeight.w600,
               ),
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
             ),
+
+            const SizedBox(height: 4),
+
+            // Descripción
+            if (app.description.isNotEmpty)
+              Flexible(
+                child: Text(
+                  app.description,
+                  style: AppTypography.bodySmall.copyWith(
+                    color: AppColors.onSurfaceVariant,
+                  ),
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ),
           ],
         ),
       ),
@@ -286,11 +287,18 @@ class AppsSelectorScreen extends ConsumerWidget {
       child: Column(
         children: [
           Icon(
-            isOwner ? Icons.add_business : Icons.group_work_outlined,
+            isOwner ? Icons.add_business : Icons.share,
             size: 64,
             color: AppColors.onSurfaceVariant,
           ),
           const SizedBox(height: 16),
+          Text(
+            isOwner ? 'No tienes Apps creadas' : 'No tienes Apps compartidas',
+            style: AppTypography.titleMedium.copyWith(
+              color: AppColors.onSurfaceVariant,
+            ),
+          ),
+          const SizedBox(height: 8),
           Text(
             isOwner
                 ? 'Crea tu primera App para comenzar'
@@ -314,7 +322,7 @@ class AppsSelectorScreen extends ConsumerWidget {
           physics: const NeverScrollableScrollPhysics(),
           gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
             crossAxisCount: crossAxisCount,
-            childAspectRatio: 1.2,
+            childAspectRatio: 1.1,
             crossAxisSpacing: 16,
             mainAxisSpacing: 16,
           ),
@@ -325,40 +333,41 @@ class AppsSelectorScreen extends ConsumerWidget {
                 padding: const EdgeInsets.all(16),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Container(
-                      width: 48,
-                      height: 48,
-                      decoration: BoxDecoration(
-                        color: AppColors.onSurfaceVariant.withOpacity(0.1),
-                        borderRadius: BorderRadius.circular(12),
+                    children: [
+                      Container(
+                        width: 48,
+                        height: 48,
+                        decoration: BoxDecoration(
+                          color: AppColors.onSurfaceVariant.withOpacity(0.1),
+                          borderRadius: BorderRadius.circular(12),
+                        ),
                       ),
-                    ),
-                    const SizedBox(height: 12),
-                    Container(
-                      width: double.infinity,
-                      height: 16,
-                      decoration: BoxDecoration(
-                        color: AppColors.onSurfaceVariant.withOpacity(0.1),
-                        borderRadius: BorderRadius.circular(8),
+                      const SizedBox(height: 12),
+                      Container(
+                        width: double.infinity,
+                        height: 16,
+                        decoration: BoxDecoration(
+                          color: AppColors.onSurfaceVariant.withOpacity(0.1),
+                          borderRadius: BorderRadius.circular(8),
+                        ),
                       ),
-                    ),
-                    const SizedBox(height: 8),
-                    Container(
-                      width: 100,
-                      height: 12,
-                      decoration: BoxDecoration(
-                        color: AppColors.onSurfaceVariant.withOpacity(0.1),
-                        borderRadius: BorderRadius.circular(6),
+                      const SizedBox(height: 8),
+                      Container(
+                        width: 100,
+                        height: 12,
+                        decoration: BoxDecoration(
+                          color: AppColors.onSurfaceVariant.withOpacity(0.1),
+                          borderRadius: BorderRadius.circular(6),
+                        ),
                       ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
-              ),
-            );
-          },
-        );
-      },
+              );
+            },
+          );
+        },
+      ),
     );
   }
 
@@ -382,7 +391,7 @@ class AppsSelectorScreen extends ConsumerWidget {
           const SizedBox(height: 8),
           Text(
             error,
-            style: AppTypography.bodySmall.copyWith(
+            style: AppTypography.bodyMedium.copyWith(
               color: AppColors.onSurfaceVariant,
             ),
             textAlign: TextAlign.center,
@@ -393,27 +402,45 @@ class AppsSelectorScreen extends ConsumerWidget {
   }
 
   Widget _buildCreateAppButton(BuildContext context, WidgetRef ref) {
-    return ResponsiveButton(
-      text: 'Crear Nueva App',
-      onPressed: () => _showCreateAppDialog(context, ref),
-      icon: Icons.add,
+    return SizedBox(
+      width: double.infinity,
+      child: ElevatedButton.icon(
+        onPressed: () => _showCreateAppDialog(context, ref),
+        icon: const Icon(Icons.add),
+        label: const Text('Crear Nueva App'),
+        style: ElevatedButton.styleFrom(
+          backgroundColor: AppColors.primary,
+          foregroundColor: Colors.white,
+          padding: const EdgeInsets.symmetric(vertical: 16),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
+          ),
+        ),
+      ),
     );
   }
 
   void _selectApp(BuildContext context, WidgetRef ref, AppModel app) {
-    // Navegar al dashboard de la app seleccionada
-    context.go('/dashboard', extra: {'appId': app.id});
+    print('📱 APPS: Seleccionando App: ${app.name} (${app.id})');
+
+    // Actualizar el App seleccionada
+    ref.read(selectedAppProvider.notifier).state = app;
+
+    // Navegar al dashboard principal
+    context.go('/dashboard');
   }
 
   void _showCreateAppDialog(BuildContext context, WidgetRef ref) {
     showDialog(
       context: context,
-      builder: (context) => _CreateAppDialog(ref: ref),
+      builder: (BuildContext context) {
+        return _CreateAppDialog(ref: ref);
+      },
     );
   }
 }
 
-/// Dialog para crear una nueva App
+/// Dialog para crear nueva App
 class _CreateAppDialog extends ConsumerStatefulWidget {
   final WidgetRef ref;
 
@@ -424,9 +451,9 @@ class _CreateAppDialog extends ConsumerStatefulWidget {
 }
 
 class _CreateAppDialogState extends ConsumerState<_CreateAppDialog> {
+  final _formKey = GlobalKey<FormState>();
   final _nameController = TextEditingController();
   final _descriptionController = TextEditingController();
-  final _formKey = GlobalKey<FormState>();
   bool _isLoading = false;
 
   @override
@@ -443,6 +470,7 @@ class _CreateAppDialogState extends ConsumerState<_CreateAppDialog> {
         'Crear Nueva App',
         style: AppTypography.headlineSmall.copyWith(
           color: AppColors.onSurface,
+          fontWeight: FontWeight.w600,
         ),
       ),
       content: Form(
@@ -455,13 +483,14 @@ class _CreateAppDialogState extends ConsumerState<_CreateAppDialog> {
               decoration: const InputDecoration(
                 labelText: 'Nombre de la App',
                 hintText: 'Ej: Mi Inventario',
+                border: OutlineInputBorder(),
               ),
               validator: (value) {
-                if (value == null || value.isEmpty) {
-                  return 'Por favor ingresa un nombre';
+                if (value == null || value.trim().isEmpty) {
+                  return 'El nombre es requerido';
                 }
-                if (value.length < 3) {
-                  return 'El nombre debe tener al menos 3 caracteres';
+                if (value.trim().length < 3) {
+                  return 'Mínimo 3 caracteres';
                 }
                 return null;
               },
@@ -471,9 +500,10 @@ class _CreateAppDialogState extends ConsumerState<_CreateAppDialog> {
               controller: _descriptionController,
               decoration: const InputDecoration(
                 labelText: 'Descripción (opcional)',
-                hintText: 'Describe el propósito de esta app',
+                hintText: 'Describe tu espacio de trabajo',
+                border: OutlineInputBorder(),
               ),
-              maxLines: 3,
+              maxLines: 2,
             ),
           ],
         ),
@@ -487,8 +517,8 @@ class _CreateAppDialogState extends ConsumerState<_CreateAppDialog> {
           onPressed: _isLoading ? null : _createApp,
           child: _isLoading
               ? const SizedBox(
-                  width: 20,
-                  height: 20,
+                  width: 16,
+                  height: 16,
                   child: CircularProgressIndicator(strokeWidth: 2),
                 )
               : const Text('Crear'),
@@ -505,27 +535,39 @@ class _CreateAppDialogState extends ConsumerState<_CreateAppDialog> {
     });
 
     try {
-      final repository = ref.read(appsRepositoryProvider);
-      await repository.createApp(
+      final appsRepository = widget.ref.read(appsRepositoryProvider);
+
+      final newApp = await appsRepository.createApp(
         name: _nameController.text.trim(),
-        description: _descriptionController.text.trim(),
+        description: _descriptionController.text.trim().isEmpty
+            ? null
+            : _descriptionController.text.trim(),
       );
+
+      print('📱 APPS: App creada exitosamente: ${newApp.name}');
 
       if (mounted) {
         Navigator.of(context).pop();
+
+        // Opcional: Seleccionar automáticamente la nueva App
+        widget.ref.read(selectedAppProvider.notifier).state = newApp;
+
+        // Mostrar mensaje de éxito
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('App creada exitosamente'),
-            backgroundColor: Colors.green,
+          SnackBar(
+            content: Text('App "${newApp.name}" creada exitosamente'),
+            backgroundColor: AppColors.primary,
           ),
         );
       }
-    } catch (e) {
+    } catch (error) {
+      print('❌ Error al crear App: $error');
+
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Error al crear la app: $e'),
-            backgroundColor: Colors.red,
+            content: Text('Error al crear App: $error'),
+            backgroundColor: AppColors.error,
           ),
         );
       }
